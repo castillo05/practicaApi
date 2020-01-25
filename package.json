@@ -1,0 +1,30 @@
+{
+  "name": "practicaapi",
+  "version": "1.0.0",
+  "description": "Practica Api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./node_modules/.bin/babel src --watch --out-dir dist",
+    "start": "nodemon dist/index.js",
+    "watch": "babel-watch dist"
+  },
+  "author": "Jorge Castillo",
+  "license": "MIT",
+  "dependencies": {
+    "@babel/polyfill": "^7.8.3",
+    "@hapi/joi": "^17.1.0",
+    "bcrypt": "^3.0.7",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.8.9",
+    "nodemailer": "^6.4.2"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "nodemon": "^2.0.2"
+  }
+}
