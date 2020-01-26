@@ -92,4 +92,19 @@ export default api
                     } catch (error) {
                         console.log(error);
                     }
+                }).get('/user/:id', async (req, res)=>{
+                    try {
+                        let user = await User.findById(req.params.id);
+
+                        if(!user){
+                            return res.status(500).send({message:'Este usuario no existe'});
+                        }
+                        res.status(200).send({user:user});
+
+                    } catch (error) {
+                        console.log(error.message);
+                        if(error.message){
+                            return res.status(500).send({error:error.message, message:'Error al obtener usuario'});
+                        }
+                    }
                 })
