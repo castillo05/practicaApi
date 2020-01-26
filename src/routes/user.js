@@ -107,4 +107,26 @@ export default api
                             return res.status(500).send({error:error.message, message:'Error al obtener usuario'});
                         }
                     }
+                }).put('/user/:id', async (req, res)=>{
+                    try {
+                       
+                        let update={
+                            firstName:req.body.firstName,
+                            lastName:req.body.lastName,
+                            email:req.body.email,
+
+                        }
+                        let validate= await UserValidation.validate(update);
+                        if(validate.error){
+                           return res.status(500).send({message:validate.error.message})
+                        }
+                        let userUpdate= await User.findByIdAndUpdate(req.params.id,update);
+                        
+                        res.status(200).send({user:userUpdate});
+                    } catch (error) {
+                        console.log(error.message);
+                        if(error.message){
+                            return res.status(500).send({error:error.message, message:'Error al actualizar usuario'});
+                        }
+                    }
                 })
