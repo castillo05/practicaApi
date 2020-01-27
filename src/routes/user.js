@@ -11,9 +11,11 @@ config()
 
 const {PRIVATEKEYTOKEN}=process.env;
 
-const {User:{model,validation}}=models;
+const {User:{model,validation, passwordValidation, userValidateUpdate}}=models;
 const User=model;
 const UserValidation=validation;
+const passwordvalidate=passwordValidation;
+const userupdatevalidate=userValidateUpdate;
 const api=express.Router();
 
 export default api
@@ -30,7 +32,11 @@ export default api
                        
                         let validate = UserValidation.validate(req.body);
                         if(validate.error){
-                            res.status(500).send({message:validate.error.message})
+                            if(validate.error.message === '"password_repeat" must be [ref:password]'){
+                                return res.status(500).send({message:'La contraseña no coincide'});
+                            }
+                            
+                           return res.status(500).send({message:validate.error.message})
                         }
                         let searchUser= User.find({email:req.body.email.toLowerCase()}).sort();
                         await searchUser.exec().then(user=>{
@@ -92,4 +98,90 @@ export default api
                     } catch (error) {
                         console.log(error);
                     }
+                }).get('/user/:id', async (req, res)=>{
+                    try {
+                        let user = await User.findById(req.params.id);
+
+                        if(!user){
+                            return res.status(500).send({message:'Este usuario no existe'});
+                        }
+                        res.status(200).send({user:user});
+
+                    } catch (error) {
+                        console.log(error.message);
+                        if(error.message){
+                            return res.status(500).send({error:error.message, message:'Error al obtener usuario'});
+                        }
+                    }
+                }).put('/user/:id', async (req, res)=>{
+                    try {
+                       
+                        let update={
+                            firstName:req.body.firstName,
+                            lastName:req.body.lastName,
+                            email:req.body.email,
+
+                        }
+                        let validate= await userupdatevalidate.validate(update);
+                        if(validate.error){
+                           return res.status(500).send({message:validate.error.message})
+                        }
+                        let userUpdate= await User.findByIdAndUpdate(req.params.id,update);
+                        
+                        res.status(200).send({user:userUpdate});
+                    } catch (error) {
+                        console.log(error.message);
+                        if(error.message){
+                            return res.status(500).send({error:error.message, message:'Error al actualizar usuario'});
+                        }
+                    }
+                }).put('/user/password-reset/:id', async (req, res)=>{
+                    
+                    try {
+                        // Almacenamos los datos requeridos
+                        let update={
+                            password_old:req.body.password_old,
+                            password:req.body.password,
+                            password_repeat:req.body.password_repeat
+
+                        }
+                        // Validamos los campos
+                        let validate=await passwordvalidate.validate(update);
+                        // Si falla la validacion lanza mensaje de error
+                        if(validate.error){
+                        return res.status(500).send({message:validate.error.message})
+                        
+                        }
+                        // Buscamos el usuario
+                        let searchUser= await User.findById(req.params.id);
+                        // Si el usuario es encontrado
+                        if(searchUser){
+                            // Compara la contraseña 
+                            bcrypt.compare(req.body.password_old,searchUser.password,(err,result)=>{
+                                if(err) return console.log(err);
+                                // Si el password no coinciden lanza el mensaje
+                                if(!result){
+                                    res.status(200).send({message:'Su contraseña actual no coinciden'});
+                                }else{
+                                //    si coinciden encripta la nueva contraseña 
+                                    bcrypt.hash(req.body.password,10).then(async(hash)=>{
+                                        if(hash){
+                                            let update={
+                                                password:hash
+                                            }
+                                            // Busca de nuevo el usuario y guarda la nueva contrasenia
+                                            let updatePassword = await User.findByIdAndUpdate(req.params.id,update);
+                                            // Si guarda la nueva contrasenia con exito lanza el mensaje
+                                            if(updatePassword) return res.status(200).send({message:'Contraseña modificada con exito'});
+                                        } 
+                                    }).catch((error)=>{
+                                        console.log(error);
+                                    })
+                                }
+                            })
+                        }
+                    } catch (error) {
+                        console.log(error);
+                    }   
+
                 })
