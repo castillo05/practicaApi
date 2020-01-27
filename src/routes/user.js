@@ -11,10 +11,11 @@ config()
 
 const {PRIVATEKEYTOKEN}=process.env;
 
-const {User:{model,validation, passwordValidation}}=models;
+const {User:{model,validation, passwordValidation, userValidateUpdate}}=models;
 const User=model;
 const UserValidation=validation;
 const passwordvalidate=passwordValidation;
+const userupdatevalidate=userValidateUpdate;
 const api=express.Router();
 
 export default api
@@ -117,7 +118,7 @@ export default api
                             email:req.body.email,
 
                         }
-                        let validate= await UserValidation.validate(update);
+                        let validate= await userupdatevalidate.validate(update);
                         if(validate.error){
                            return res.status(500).send({message:validate.error.message})
                         }

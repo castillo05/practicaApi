@@ -48,8 +48,15 @@ const passwordValidate=Joi.object().keys({
     
 })
 
+const userValidateUpdate=Joi.object().keys({
+    firstName:Joi.string().required(),
+    lastName:Joi.string().required(),
+    email: Joi.string().email({minDomainSegments:2}).required()
+})
+
 export default {
     model: database.model('User', User),
     validation: UserValidate,
-    passwordValidation: passwordValidate
+    passwordValidation: passwordValidate,
+    userValidateUpdate: userValidateUpdate
 }
