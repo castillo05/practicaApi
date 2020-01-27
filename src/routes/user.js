@@ -32,7 +32,11 @@ export default api
                        
                         let validate = UserValidation.validate(req.body);
                         if(validate.error){
-                            res.status(500).send({message:validate.error.message})
+                            if(validate.error.message === '"password_repeat" must be [ref:password]'){
+                                return res.status(500).send({message:'La contraseña no coincide'});
+                            }
+                            
+                           return res.status(500).send({message:validate.error.message})
                         }
                         let searchUser= User.find({email:req.body.email.toLowerCase()}).sort();
                         await searchUser.exec().then(user=>{
