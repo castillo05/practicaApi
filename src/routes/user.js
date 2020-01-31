@@ -6,6 +6,7 @@ import bcrypt from 'bcrypt';
 import jsonwebtoken from 'jsonwebtoken';
 import {config} from 'dotenv';
 import mailer from '../service/email';
+import auth from '../middleware/authenticate';
 
 config()
 
@@ -19,7 +20,7 @@ const userupdatevalidate=userValidateUpdate;
 const api=express.Router();
 
 export default api
-                .get('/user',async (req, res)=>{
+                .get('/user',auth.authenticate,async (req, res,next)=>{
                     try {
                         let users= await User.find().exec();
 
